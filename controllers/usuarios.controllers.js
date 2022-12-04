@@ -1,17 +1,30 @@
 const { response, request } = require('express');
 const Usuario = require('../models/Usuario.model');
+const authModel = require ('../models/Auth.model');
 
-const usuariosGet = (req = request, res = response) => {
+const usuariosGet = async (req = request, res = response) => {
     // GET - http://localhost:3000/usuarios
+   try{
+    const usuarios = await Usuario.find();
     res.status(200).json({
-        msg: 'GET API - controlador'
+        msg: 'GET API - controlador',
+        detalle: usuarios
     })
+   }
+    
+    catch (error) {
+        res.status(400).json({
+            msg: 'se detecto error',
+            detalle: error.message
+      });
+    }
 };
 const usuariosPost = async(req = request, res = response) => {
     // POST - http://localhost:3000/usuarios
   try {
     const body = req.body;
-    const usuario = new Usuario(body);
+    let usuario = new Usuario(body);
+    usuario.password = await authModel.hashPassword(usuario.password);
     await usuario.save();
     res.status(200).json({
         msg: 'POST API - controlador',
@@ -25,10 +38,11 @@ const usuariosPost = async(req = request, res = response) => {
   });
 }
 };
-const usuariosPut = (req = request, res = response) => {
+const usuariosPut = async(req = request, res = response) => {
     // PUT - http://localhost:3000/usuarios/10
     const { id } = req.params;
     const body = req.body;
+    const usuario = await Usuario.findByIdAndUpdate(id, body);
     console.log(req.body);
     res.status(200).json({
         msg: 'PUT API - controlador',
@@ -36,11 +50,12 @@ const usuariosPut = (req = request, res = response) => {
         body: body
     });
 };
-const usuariosDelete = (req = request, res = response) => {
+const usuariosDelete = async (req = request, res = response) => {
     // DELETE - http://localhost:3000/usuarios/10
     const { id } = req.params;
+    const usuario = await Usuario.findByIdAndDelete(id);
     res.status(200).json({
-        msg: 'DELETE API - controlador',
+        msg: 'El usuario fue eliminado',
         id
     });
 };
