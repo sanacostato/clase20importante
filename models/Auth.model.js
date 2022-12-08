@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require ('jsonwebtoken');
 // utilizamos el metodo BCRYPT
 const hashPassword = async (password) => {
     const saltRounds = 10;
@@ -13,7 +14,23 @@ const comparePassword = async (password, hash) => {
     // devuelve un true o false
 }
 
+const generarToken = (data) => {
+    return jwt.sign(
+        {
+            data
+        },
+        process.env.SECRET_JWT,
+        { expiresIn: '8h' }
+    );
+}
+
+const validarToken = (token) => {
+    return jwt.verify(token, process.env.SECRET_JWT);
+};
+
 module.exports = {
     hashPassword,
-    comparePassword
+    comparePassword,
+    generarToken,
+    validarToken
 }
